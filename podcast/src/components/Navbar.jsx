@@ -13,7 +13,7 @@ function Navbar() {
         <Link to="/blog" className="hover:text-pink-500 transition">BLOG</Link>
         <a href="#" className="px-3 py-1 bg-pink-100 text-pink-600 rounded-full hover:bg-pink-200 transition">DEMO</a>
         <a href="#" className="hover:text-pink-500 transition">TEAM</a>
-        <a href="#" className="hover:text-pink-500 transition">CONTACT</a>
+   <Link to="/contact" className="hover:text-pink-500 transition">Contact</Link>
       </div>
     </nav>
   );

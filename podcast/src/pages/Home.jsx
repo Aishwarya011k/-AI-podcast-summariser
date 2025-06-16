@@ -1,5 +1,6 @@
 import React from "react";
 import Footer from "../components/Footer";
+
 function Home() {
   return (
     <div className="min-h-screen  min-w-screen bg-gradient-to-b from-white via-blue-50 to-purple-50 font-sans">
