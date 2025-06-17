@@ -7,7 +7,7 @@ function Footer() {
 
         {/* Left Section */}
         <div className="mb-5 md:mb-0">
-          <h1 className="text-2xl font-bold text-red-500 mb-2">🎙 Podcast Summarizer</h1>
+          <h1 className="text-2xl font-bold text-red-500 mb-2">🎙PodSnap AI</h1>
           <p className="text-sm text-gray-400">Transform your podcasts into powerful summaries and highlights using AI. Audio or video — we got you covered.</p>
         </div>
 
@@ -15,7 +15,7 @@ function Footer() {
         <div className="flex space-x-6 mb-5 md:mb-0">
           <a href="/" className="hover:text-red-400 transition">Home</a>
           <a href="/blog" className="hover:text-red-400 transition">Blog</a>
-          <a href="/about" className="hover:text-red-400 transition">About</a>
+          <a href="/teams" className="hover:text-red-400 transition">PODCAST</a>
           <a href="/contact" className="hover:text-red-400 transition">Contact</a>
         </div>
 
