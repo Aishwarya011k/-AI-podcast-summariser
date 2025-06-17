@@ -9,7 +9,7 @@ function Home() {
         {/* Left Content */}
         <div className="w-full lg:w-1/2 text-center lg:text-left">
           <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            PodSnap AI
+            Brief Cast: AI Podcast Summariser
           </h1>
           <p className="text-gray-700 mb-8 text-base md:text-lg leading-relaxed">
             Upload your podcast audio or video and get instant summaries, highlights, and key insights powered by advanced AI.

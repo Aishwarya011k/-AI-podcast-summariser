@@ -7,7 +7,7 @@ function Footer() {
 
         {/* Left Section */}
         <div className="mb-5 md:mb-0">
-          <h1 className="text-2xl font-bold text-red-500 mb-2">🎙PodSnap AI</h1>
+          <h1 className="text-2xl font-bold text-red-500 mb-2">🎙Brief Cast</h1>
           <p className="text-sm text-gray-400">Transform your podcasts into powerful summaries and highlights using AI. Audio or video — we got you covered.</p>
         </div>
 
