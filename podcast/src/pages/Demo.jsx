@@ -23,18 +23,30 @@ function Demo() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   const summarizePodcast = async (transcript) => {
+    if (!transcript || transcript.trim().length === 0) {
+      return "⚠️ Please provide some text to summarize.";
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript }),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to get summary from server');
+      }
+
       const data = await res.json();
       return data.summary || "No summary returned.";
     } catch (error) {
       console.error("Summarization error:", error);
+      if (error.message.includes("Failed to fetch")) {
+        return "⚠️ Cannot connect to the server. Please make sure the backend is running.";
+      }
       return "⚠️ Failed to summarize. Please try again.";
     }
   };
@@ -62,8 +74,8 @@ function Demo() {
     recognition.interimResults = false;
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInput(transcript);
+      const spokenText = event.results[0][0].transcript;
+      setInput(spokenText);
     };
 
     recognition.onend = () => setIsListening(false);
@@ -78,13 +90,14 @@ function Demo() {
     if (file) {
       setFileName(file.name);
 
-      // Example: Read text file content
       if (file.type === "text/plain") {
         const text = await file.text();
         setTranscript(text);
+        setInput(text);
         setShowTranscript(true);
+      } else {
+        alert("Only .txt files are supported.");
       }
-      // You can add more file type handling here
     }
   };
 
@@ -125,7 +138,6 @@ function Demo() {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Transcript Section */}
         <div className="border-t border-gray-700">
           <button
             onClick={() => setShowTranscript(!showTranscript)}
@@ -207,3 +219,4 @@ function Demo() {
 }
 
 export default Demo;
+
