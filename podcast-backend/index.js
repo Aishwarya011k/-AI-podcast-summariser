@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
+import youtubeRouter from "./youtube.js";
+import audioRouter from "./audio.js";
 
 dotenv.config();
 
@@ -39,6 +41,9 @@ app.post("/api/summarize", async (req, res) => {
     res.status(500).json({ error: "Failed to summarize" });
   }
 });
+
+app.use(youtubeRouter);
+app.use(audioRouter);
 
 const PORT = 5000;
 app.listen(PORT, () => {

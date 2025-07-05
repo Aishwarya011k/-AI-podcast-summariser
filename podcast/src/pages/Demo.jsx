@@ -3,6 +3,8 @@ import { FiSend } from "react-icons/fi";
 import { FaMicrophone } from "react-icons/fa";
 import { AiOutlineUpload } from "react-icons/ai";
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
+import { summarizePodcast } from "../api/gemini";
+import axios from "axios";
 
 function Demo() {
   const [messages, setMessages] = useState([
@@ -17,39 +19,14 @@ function Demo() {
   const [fileName, setFileName] = useState(null);
   const [transcript, setTranscript] = useState("");
   const [showTranscript, setShowTranscript] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
   const chatEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-  const summarizePodcast = async (transcript) => {
-    if (!transcript || transcript.trim().length === 0) {
-      return "⚠️ Please provide some text to summarize.";
-    }
-
-    try {
-      const res = await fetch("http://localhost:5000/api/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript }),
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to get summary from server');
-      }
-
-      const data = await res.json();
-      return data.summary || "No summary returned.";
-    } catch (error) {
-      console.error("Summarization error:", error);
-      if (error.message.includes("Failed to fetch")) {
-        return "⚠️ Cannot connect to the server. Please make sure the backend is running.";
-      }
-      return "⚠️ Failed to summarize. Please try again.";
-    }
-  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -101,11 +78,83 @@ function Demo() {
     }
   };
 
+  // Handle YouTube link transcript fetch
+  const handleYoutubeTranscript = async () => {
+    if (!youtubeUrl.trim()) return;
+    setIsTyping(true);
+    try {
+      const res = await axios.post("http://localhost:5000/api/youtube-transcript", { url: youtubeUrl });
+      setTranscript(res.data.transcript);
+      setInput(res.data.transcript);
+      setShowTranscript(true);
+      setMessages((prev) => [...prev, { sender: "bot", text: "Transcript fetched from YouTube!" }]);
+    } catch (err) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "⚠️ Failed to fetch YouTube transcript." }]);
+    }
+    setIsTyping(false);
+  };
+
+  // Handle audio file transcript fetch
+  const handleAudioTranscript = async () => {
+    if (!audioFile) return;
+    setIsTyping(true);
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioFile);
+      const res = await axios.post("http://localhost:5000/api/audio-transcript", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setTranscript(res.data.transcript);
+      setInput(res.data.transcript);
+      setShowTranscript(true);
+      setMessages((prev) => [...prev, { sender: "bot", text: "Transcript fetched from audio!" }]);
+    } catch (err) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "⚠️ Failed to transcribe audio." }]);
+    }
+    setIsTyping(false);
+  };
+
   return (
     <div className="min-h-screen min-w-screen bg-gradient-to-br from-black to-gray-900 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl bg-gray-800/60 backdrop-blur-md rounded-xl shadow-lg border border-gray-700 flex flex-col h-[90vh]">
         <div className="text-center p-4 border-b border-gray-700 text-red-400 text-xl font-bold">
           🎙️ PodAI Chatbot
+        </div>
+
+        {/* New: YouTube and Audio Inputs */}
+        <div className="flex flex-col md:flex-row gap-2 p-4 border-b border-gray-700">
+          <input
+            type="text"
+            placeholder="Paste YouTube link..."
+            className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
+            value={youtubeUrl}
+            onChange={(e) => setYoutubeUrl(e.target.value)}
+          />
+          <button
+            onClick={handleYoutubeTranscript}
+            className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-500"
+          >
+            Get YouTube Transcript
+          </button>
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={(e) => setAudioFile(e.target.files[0])}
+            className="hidden"
+            id="audio-upload"
+          />
+          <label
+            htmlFor="audio-upload"
+            className="bg-green-600 text-white px-4 py-2 rounded-full cursor-pointer hover:bg-green-500"
+          >
+            Upload Audio
+          </label>
+          <button
+            onClick={handleAudioTranscript}
+            className="bg-green-700 text-white px-4 py-2 rounded-full hover:bg-green-600"
+          >
+            Get Audio Transcript
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -169,10 +218,7 @@ function Demo() {
         </div>
 
         <div className="border-t border-gray-700 p-3 flex gap-2 items-center">
-          <label
-            htmlFor="uploadFile"
-            className="text-white text-xl cursor-pointer"
-          >
+          <label htmlFor="uploadFile" className="text-white text-xl cursor-pointer">
             <AiOutlineUpload />
           </label>
           <input
@@ -184,9 +230,7 @@ function Demo() {
 
           <button
             onClick={startListening}
-            className={`text-white text-xl ${
-              isListening ? "animate-pulse" : ""
-            }`}
+            className={`text-white text-xl ${isListening ? "animate-pulse" : ""}`}
           >
             <FaMicrophone />
           </button>
